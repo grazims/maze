@@ -28,6 +28,21 @@ World.add(world, walls);
 
 //maze grid
 
+const shuffle = arr => {
+  let counter = arr.lenght;
+
+  while (counter > 0) {
+    const index = Math.floor(Math.random() * counter);
+
+    counter--;
+
+    const temp = arr[counter];
+    arr[counter] = arr[index];
+    arr[index] = temp;
+  }
+  return arr;
+};
+
 const grid = Array(cells)
   .fill(null)
   .map(() => Array(cells).fill(false));
@@ -38,3 +53,53 @@ const verticals = Array(cells)
 const horizontals = Array(cells - 1)
   .fill(null)
   .map(() => Array(cells).fill(false));
+
+const startRow = Math.floor(Math.random() * cells);
+const startColumn = Math.floor(Math.random() * cells);
+
+const stepThroughCell = (row, column) => {
+  //if the cell was visited at [row, cell], then return
+  if (grid[row][column]) {
+    return;
+  }
+  //mark this cell as visited
+  grid[row][column] = true;
+  //assemble random list of neighbors
+  const neighbors = shuffle([
+    [row - 1, column, "up"],
+    [(row, column + 1, "right")],
+    [row + 1, column, "down"],
+    [row, column - 1, "left"]
+  ]);
+  //for each neighbor
+  for (let neighbor of neighbors) {
+    const [nextRow, nextColumn, direction] = neighbor;
+
+    //see if that neighbor is out of bounds
+    if (
+      nextRow < 0 ||
+      nextRow >= cells ||
+      nextColumn < 0 ||
+      nextColumn >= cells
+    ) {
+      continue;
+    }
+    //if it was visited, continue to the next
+    if (grid[nextRow][nextColumn]) {
+      continue;
+    }
+    //remove a wall
+    if (direction === "left") {
+      verticals[row][column - 1] = true;
+    } else if (direction === "right") {
+      verticals[row][column] = true;
+    } else if (direction === "up") {
+      horizontals[row - 1][column] = true;
+    } else if (direction === "down") {
+      horizontals[row][column] = true;
+    }
+    //visit next cell
+  }
+};
+
+stepThroughCell(startRow, startColumn);
